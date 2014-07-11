@@ -7,10 +7,12 @@
         [ring.middleware.params]
         [ring.middleware.cookies]
         [ring.middleware.session]
-        [ring.middleware.session.cookie])
+        [ring.middleware.session.cookie]
+        [compojure.core])
   (:require [clojure.java.io :as io]
             [hello-ring.dao.db :as db]
-            [net.cgrand.enlive-html :as html]))
+            [net.cgrand.enlive-html :as html]
+            [compojure.route :as route]))
 
 (declare main-template server main-template1 main-template2)
 
@@ -33,8 +35,27 @@
   [request]
   (response (str request)))
 
-(def app
-  (-> handler wrap-params))
+(defroutes
+  app
+  (GET "/comment/:user/:content"
+       [user content]
+       (when (and user content)
+         (db/insert user content)))
+  (GET "/comment/:user"
+       [user]
+       (when user
+         (db/get-comment-by-name user)))
+  (POST "/comment/update"
+        req
+        (str req))
+  (GET "/comments"
+       []
+       (db/get-all-comments))
+  (DELETE "/comment/:id"
+          [id]
+          (db/delete-comment-by-id id)) 
+  (route/not-found "<h1>Page not found</h1>"))
+
 
 (try
   (.stop server)
@@ -46,3 +67,4 @@
   main-template "public/application.html"
   []
   [:head :title] (html/content "Enlive starter kit"))
+
