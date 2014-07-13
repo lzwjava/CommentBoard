@@ -36,35 +36,31 @@
   (response (str request)))
 
 (defroutes
-  app
-  (GET "/comment/:user/:content"
-       [user content]
-       (when (and user content)
-         (db/insert user content)))
+  app*
+  (GET "/comment"
+       [user content :as request]
+       (when (and user content) (db/insert user content))
+       (str request))
   (GET "/comment/:user"
        [user]
        (when user
          (db/get-comment-by-name user)))
   (POST "/comment/update"
-        req
-        (str req))
+        [comment_id content]
+        (str (db/update-comment-by-id comment_id content)))
   (GET "/comments"
        []
-       (db/get-all-comments))
+       (header (response (db/get-all-comments))
+               "Access-Control-Allow-Origin" "*"))
   (DELETE "/comment/:id"
           [id]
-          (db/delete-comment-by-id id)) 
+          (db/delete-comment-by-id id))
   (route/not-found "<h1>Page not found</h1>"))
 
+(def app (wrap-params  app*))
 
 (try
   (.stop server)
   (catch Exception e))
 
 ;(def server (run-jetty app {:port 3004 :join? false}))
-
-(html/deftemplate
-  main-template "public/application.html"
-  []
-  [:head :title] (html/content "Enlive starter kit"))
-

@@ -9,7 +9,7 @@
    :subprotocol "mysql"
    :subname     "//127.0.0.1:3306/sql_db"
    :user        "root"
-   :password    "lizhiwei"})
+   :password    ""})
 
 (defn insert [name comment]
   (jdbc/insert! db-spec :comment
@@ -41,3 +41,10 @@
   (let [res (jdbc/query db-spec
                         ["select * from comment where name=? order by createdAt desc" name])]
     res))
+
+(defn update-comment-by-id
+  [comment_id content]
+  (let [res (jdbc/execute! db-spec ["update comment set comment=? where id=?" content comment_id])]
+    (first res)))
+
+(update-comment-by-id 11 "changed sth")

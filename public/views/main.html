@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<meta http-equiv="content-type" content="text/html;charset=UTF-8"/>
+<html>
+<head>
+    <title></title>
+</head>
+
+<script>
+    (function () {
+        // Load the script
+        var script = document.createElement("SCRIPT");
+        script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js';
+        script.type = 'text/javascript';
+        document.getElementsByTagName("head")[0].appendChild(script);
+
+        // Poll for jQuery to come into existance
+        var checkReady = function (callback) {
+            if (window.jQuery) {
+                callback(jQuery);
+            }
+            else {
+                window.setTimeout(function () {
+                    checkReady(callback);
+                }, 100);
+            }
+        };
+
+        // Start polling...
+        checkReady(function ($) {
+            // Use $ here...
+            $.get('http://127.0.0.1:3000/comments',
+                    {},
+                    function (data) {
+                        var ul=document.getElementById("commentList");
+                        var json=JSON.parse(data);
+                        for(var i=0;i<json.length;i++){
+                            var comment=json[i];
+                            var li=document.createElement("li");
+                            li.appendChild(document.createTextNode(comment.name+":"+comment.comment));
+                            li.setAttribute("id","commnet_"+comment.id);
+                            ul.appendChild(li);
+                        }
+                    });
+        });
+    })();
+
+    function check() {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", 'http://127.0.0.1:3000/comments', true);
+        xmlHttp.onload = function () {
+            var res = xmlHttp.responseText;
+            //alert(res);
+        };
+        xmlHttp.send();
+    }
+    ;
+
+    //check();
+</script>
+
+<body>
+<p>亲爱的客官，留个言吧.come on</p>
+
+<form action="http://localhost:3000/comment">
+    <p>名字：<input name="user" type="text"></p>
+
+    <p>留言：<input name="content" type="text"></p>
+    <input type="submit" value="提交"></form>
+
+<ul id="commentList">
+</ul>
+</body>
+</html>
